@@ -33,7 +33,9 @@ var requestHandler = function(request, response) {
   
   var headers = request.headers;
   var method = request.method;
-  var url = request.url;
+  var path = request.url.split('?');
+  var url = path[0];
+  var queries = path[1];
   var body = [];
   
   // See the note below about CORS headers.
@@ -54,7 +56,7 @@ var requestHandler = function(request, response) {
   // handle all GET requests
   if (method === 'GET') {
     if (url === '/classes/messages') {
-    
+      console.log(queries);
       request.on('error', function(err) {
         console.log(err);
       });
@@ -66,7 +68,16 @@ var requestHandler = function(request, response) {
         // response.on('error', function(err) {
         //   console.error(err);
         // });
-        
+       
+        if (queries) {
+          var query = queries.split('=');
+          var param = query[0];
+          var value = query[1];
+          var filteredMessages = messages.filter(function(message) {
+            return message[param] === value;
+          });
+          console.log('filteredMessages', filteredMessages);
+        } 
         
         let statusCode = 200;
         
@@ -76,7 +87,7 @@ var requestHandler = function(request, response) {
           headers: headers,
           method: method,
           url: url,
-          results: messages
+          results: filteredMessages || messages
         };
         //console.log(body);
         response.end(JSON.stringify(responseBody));
