@@ -1,3 +1,4 @@
+'use strict';
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -11,6 +12,7 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+var messages = [];
 
 module.exports = function(request, response) {
   // Request and Response come from node's http module.
@@ -33,49 +35,82 @@ module.exports = function(request, response) {
   var method = request.method;
   var url = request.url;
   var body = [];
-  // The outgoing status.
-
+  
   // See the note below about CORS headers.
-
-  // Tell the client we are sending them plain text.
-  //
-  // You will need to change this if you are sending something
-  // other than plain text, like JSON or HTML.
+  var defaultCorsHeaders = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'access-control-allow-headers': 'content-type, accept',
+    'access-control-max-age': 10 // Seconds.
+  };
+  
+  var responseHeaders = defaultCorsHeaders;
+  responseHeaders['Content-Type'] = 'application/json';
+  // The outgoing status.
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  
-  request.on('error', function(err) {
-    console.log(err);
-  }).on('data', function(chunk) {
-    body.push(chunk);
-  }).on('end', function() {
 
-    response.on('error', function(err) {
-      console.error(err);
+  // handle all GET requests
+  if (method === 'GET') {
+    if (url === '/classes/messages') {
+      request.on('error', function(err) {
+        console.log(err);
+      }).on('data', function(chunk) {
+        body.push(chunk);
+      }).on('end', function() {
+
+        response.on('error', function(err) {
+          console.error(err);
+        });
+        
+        
+        let statusCode = 200;
+        
+        response.writeHead(statusCode, responseHeaders);
+        
+        var responseBody = {
+          headers: headers,
+          method: method,
+          url: url,
+          results: messages
+        };
+        //console.log(body);
+        response.end(JSON.stringify(responseBody));
+      });
+
+    } else {
+      let statusCode = 404;
+
+      response.writeHead(statusCode, responseHeaders);
+
+      response.end();
+    }
+  } else if (method === 'POST' && url === '/classes/messages') {
+    request.on('error', function(err) {
+      console.log(err);
+    }).on('data', function(chunk) {
+      body.push(chunk);
+    }).on('end', function() {
+
+      response.on('error', function(err) {
+        console.error(err);
+      });
+
+      let statusCode = 201;
+
+      response.writeHead(statusCode, responseHeaders);
+
+      messages.push(JSON.parse(body));
+      console.log(messages);
+      response.end(JSON.stringify(body));
+      
+
     });
-    
-    var defaultCorsHeaders = {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'access-control-allow-headers': 'content-type, accept',
-      'access-control-max-age': 10 // Seconds.
-    };
-    
-    var statusCode = 200;
-    var responseHeaders = defaultCorsHeaders;
-    responseHeaders['Content-Type'] = 'application/json';
-    response.writeHead(statusCode, responseHeaders);
-    
-    var responseBody = {
-      headers: headers,
-      method: method,
-      url: url,
-      results: body
-    };
 
-    response.end(JSON.stringify(responseBody));
-  });
+
+  }
+  
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
