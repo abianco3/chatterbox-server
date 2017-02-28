@@ -11,14 +11,14 @@ app.init = function() {
   this.fetch(this.params);
   var urlParams = window.location.search.split('=');
   window.username = urlParams[urlParams.length - 1];
-  setInterval(() => { this.fetch(this.params); }, 20000);
+  //setInterval(() => { this.fetch(this.params); }, 20000);
   console.log(username);
 };
 
 
 app.send = function(message) {
   $.ajax({
-    url: 'http://127.0.0.1:3000/',
+    url: 'http://127.0.0.1:3000/classes/messages',
     type: 'POST',
     data: JSON.stringify(message),
     contentType: 'application/json',
@@ -35,7 +35,7 @@ app.send = function(message) {
 
 app.fetch = function(params) {
   $.ajax({
-    url: 'http://127.0.0.1:3000/',
+    url: 'http://127.0.0.1:3000/classes/messages',
     type: 'GET',
     contentType: 'application/json',
     data: params,

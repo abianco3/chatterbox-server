@@ -14,7 +14,7 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 var messages = [];
 
-module.exports = function(request, response) {
+var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -54,15 +54,18 @@ module.exports = function(request, response) {
   // handle all GET requests
   if (method === 'GET') {
     if (url === '/classes/messages') {
+    
       request.on('error', function(err) {
         console.log(err);
-      }).on('data', function(chunk) {
+      });
+      request.on('data', function(chunk) {
         body.push(chunk);
-      }).on('end', function() {
+      });
+      request.on('end', function() {
 
-        response.on('error', function(err) {
-          console.error(err);
-        });
+        // response.on('error', function(err) {
+        //   console.error(err);
+        // });
         
         
         let statusCode = 200;
@@ -89,13 +92,15 @@ module.exports = function(request, response) {
   } else if (method === 'POST' && url === '/classes/messages') {
     request.on('error', function(err) {
       console.log(err);
-    }).on('data', function(chunk) {
+    });
+    request.on('data', function(chunk) {
       body.push(chunk);
-    }).on('end', function() {
+    });
+    request.on('end', function() {
 
-      response.on('error', function(err) {
-        console.error(err);
-      });
+      // response.on('error', function(err) {
+      //   console.error(err);
+      // });
 
       let statusCode = 201;
 
@@ -109,6 +114,23 @@ module.exports = function(request, response) {
     });
 
 
+  } else if (method === 'OPTIONS') {
+    request.on('error', function(err) {
+      console.log(err);
+    }).on('data', function(chunk) {
+      body.push(chunk);
+    }).on('end', function() {
+
+      // response.on('error', function(err) {
+      //   console.error(err);
+      // });
+
+      let statusCode = 200;
+
+      response.writeHead(statusCode, responseHeaders);
+
+      response.end();
+    });
   }
   
   // Make sure to always call response.end() - Node may not send
@@ -119,6 +141,8 @@ module.exports = function(request, response) {
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
 };
+
+module.exports.requestHandler = requestHandler;
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
