@@ -4,14 +4,14 @@
 const app = {
   server: 'http://127.0.0.1:3000/',
   foundRooms: {},
-  params: {order: '-createdAt'}
+  //params: {order: '-createdAt'}
 };
 
 app.init = function() {
-  this.fetch(this.params);
+  this.fetch();
   var urlParams = window.location.search.split('=');
   window.username = urlParams[urlParams.length - 1];
-  //setInterval(() => { this.fetch(this.params); }, 20000);
+  setInterval(() => { this.fetch(); }, 5000);
   console.log(username);
 };
 
@@ -96,7 +96,7 @@ app.handleSubmit = function(event) {
   var message = {};
   message.username = window.username;
   message.text = $('#message').val();
-  message.roomname = $('#roomSelect').val();
+  message.room = $('#roomSelect').val();
   this.send(message);
   return false;
 };
@@ -104,16 +104,16 @@ app.handleSubmit = function(event) {
 app.roomPopulate = function(data) {
   var messages = data.results;
   messages.forEach((obj, i, collection) => {
-    if (this.foundRooms[obj.roomname] === undefined) {
-      this.foundRooms[obj.roomname] = obj.roomname;
-      this.renderRoom(obj.roomname);
+    if (this.foundRooms[obj.room] === undefined) {
+      this.foundRooms[obj.room] = obj.room;
+      this.renderRoom(obj.room);
     }
   });
 };
 
-app.selectRoom = function(roomname) {
-  this.params.where = '{"roomname": "' + roomname + '"}';
-  this.fetch(this.params);
+app.selectRoom = function(room) {
+  //this.params.where = '{"roomname": "' + roomname + '"}';
+  this.fetch({room: room});
 };
 
 document.addEventListener('DOMContentLoaded', function() {

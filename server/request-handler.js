@@ -13,6 +13,7 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var messages = [];
+var fs = require('fs');
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -55,7 +56,15 @@ var requestHandler = function(request, response) {
 
   // handle all GET requests
   if (method === 'GET') {
-    if (url === '/classes/messages') {
+    if (url === '/') {
+      // use filesystem to access public files
+      fs.readFile('./client/client/index.html', 'utf-8', function(err, data) {
+        response.writeHead(200, {'Content-Type': 'text/html'});
+        console.log(data, err);
+        response.end(data);
+      });
+
+    } else if (url === '/classes/messages') {
       console.log(queries);
       request.on('error', function(err) {
         console.log(err);
@@ -119,7 +128,7 @@ var requestHandler = function(request, response) {
 
       messages.push(JSON.parse(body));
       console.log(messages);
-      response.end(JSON.stringify(body));
+      response.end(JSON.stringify(JSON.parse(body)));
       
 
     });
